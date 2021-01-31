@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>하루 일정</title>
+</head>
+<body>
+<div>
+    <header>
+        <h1 th:text="${year} + '/' + ${month} + '/' + ${day} + '일정'"></h1>
+    </header>
+    <main>
+        <span th:if="${plans == null }">NULL</span>
+        <span th:unless="${plans == null }">NULL</span>
+        <ul>
+            <th:block th:each="plan: ${plans}">
+                <li th:text="${plan.scheduleName}"></li>
+            </th:block>
+        </ul>
+        <button type="button"><a th:href="@{/plan/form}">새로운 일정 등록하기</a></button>
+    </main>
+</div>
+</body>
+</html>
