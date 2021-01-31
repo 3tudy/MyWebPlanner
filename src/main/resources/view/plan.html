@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>일정 조회</title>
+</head>
+<body>
+<header>
+    <h1 th:text="${year} + '/' + ${month} + '/' + ${day} + '일정'"></h1>
+</header>
+<main>
+    <h2 th:text="${plan.scheduleName}"></h2>
+    <h3>내용</h3>
+    <div th:text="${content.content}"></div>
+</main>
+</body>
+</html>
