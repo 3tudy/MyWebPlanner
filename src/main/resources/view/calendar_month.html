@@ -305,7 +305,10 @@
                     <th:block th:each="day : ${week}">
                         <a th:href="'/plan/year/' + ${year} + '/month/' + ${month} + '/day/' + ${day.date}">
                             <div class="calendar__day day"
-                                 th:text="${{day.date}}" th:style="${day.currentMonth ? 'background-color: inherit' : 'background-color: lightgrey'}"></div>
+                                 th:text="${{day.date}}" th:style="${day.currentMonth ? 'background-color: inherit' : 'background-color: lightgrey'}">
+                            </div>
+                            <span th:if="${day.hasSchedule} == true">Has Registered Event</span>
+                            <span th:unless="${day.hasSchedule} == true">Has not Registered Event</span>
                         </a>
                     </th:block>
                 </div>

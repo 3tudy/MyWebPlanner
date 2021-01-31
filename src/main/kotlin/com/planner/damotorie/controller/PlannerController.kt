@@ -30,7 +30,11 @@ class PlannerController {
         val year: Int = currentDate.get(Calendar.YEAR)
         val month: Int = currentDate.get(Calendar.MONTH) + 1
 
-        val date: List<List<Date>> = createMonthInfo(year, month)
+        val firstDateOfMonth: LocalDateTime = LocalDateTime.of(year, month, 1, 0, 0)
+        val lastDateOfMonth: LocalDateTime = firstDateOfMonth.plusMonths(1).minusSeconds(1)
+
+        val schedules: List<Event> = eventRepository.findByDateRange(firstDateOfMonth, lastDateOfMonth)
+        val date: List<List<Date>> = createMonthInfo(year, month, schedules)
         return ModelAndView("calendar_month", mapOf("year" to year, "month" to month, "date" to date))
     }
 
@@ -43,9 +47,13 @@ class PlannerController {
     fun getMonthlyPlan(@PathVariable year: Int,
                        @PathVariable month: Int): ModelAndView {
 
-        val date: List<List<Date>> = createMonthInfo(year, month)
+        val firstDateOfMonth: LocalDateTime = LocalDateTime.of(year, month, 1, 0, 0)
+        val lastDateOfMonth: LocalDateTime = firstDateOfMonth.plusMonths(1).minusDays(1)
 
-        return ModelAndView("calendar_month", mapOf("year" to year, "month" to Month.of(month), "date" to date))
+        val schedules: List<Event> = eventRepository.findByDateRange(firstDateOfMonth, lastDateOfMonth)
+        val dates: List<List<Date>> = createMonthInfo(year, month, schedules)
+
+        return ModelAndView("calendar_month", mapOf("year" to year, "month" to month, "date" to dates))
     }
 
     @GetMapping("/year/{year}/month/{month}/day/{day}")
@@ -94,7 +102,7 @@ class PlannerController {
 
     }
 
-    fun createMonthInfo(year: Int, month: Int): List<List<Date>> {
+    fun createMonthInfo(year: Int, month: Int, schedules: List<Event>): List<List<Date>> {
         val currentMonthFirstDate: Calendar = Calendar.Builder().setDate(year, month - 1, 1).build()
         val currentMonthLastDate: Calendar = Calendar.Builder().setDate(year, month - 1, currentMonthFirstDate.getActualMaximum(Calendar.DATE)).build()
 
@@ -113,7 +121,35 @@ class PlannerController {
             }
 
             print("${currentMonthFirstDate.get(Calendar.MONTH) + 1}/${currentMonthFirstDate.get(Calendar.DATE)} ")
-            monthTable.last().add(Date(currentMonthFirstDate.get(Calendar.DATE), currentMonthFirstDate.get(Calendar.DAY_OF_WEEK), currentMonthFirstDate.get(Calendar.MONTH) == month - 1))
+
+            val d: Date
+            if (currentMonthFirstDate.get(Calendar.MONTH) + 1 == month) {
+                if (schedules.any { schedule -> LocalDate.ofInstant(currentMonthFirstDate.toInstant(), currentMonthFirstDate.timeZone.toZoneId()).equals(schedule.start.toLocalDate()) }) {
+                    d = Date(
+                        currentMonthFirstDate.get(Calendar.DATE),
+                        currentMonthFirstDate.get(Calendar.DAY_OF_WEEK),
+                        currentMonthFirstDate.get(Calendar.MONTH) == month - 1,
+                        true
+                    )
+                } else {
+                    d = Date(
+                        currentMonthFirstDate.get(Calendar.DATE),
+                        currentMonthFirstDate.get(Calendar.DAY_OF_WEEK),
+                        currentMonthFirstDate.get(Calendar.MONTH) == month - 1,
+                        false
+                    )
+                }
+
+            } else {
+                d = Date(
+                    currentMonthFirstDate.get(Calendar.DATE),
+                    currentMonthFirstDate.get(Calendar.DAY_OF_WEEK),
+                    currentMonthFirstDate.get(Calendar.MONTH) == month - 1,
+                    false
+                )
+            }
+
+            monthTable.last().add(d)
             i += 1
 
             if ((currentMonthFirstDate.after(currentMonthLastDate) || currentMonthFirstDate == currentMonthLastDate) &&
