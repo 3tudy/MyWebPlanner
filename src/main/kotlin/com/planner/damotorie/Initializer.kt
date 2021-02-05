@@ -7,7 +7,10 @@ import org.springframework.web.WebApplicationInitializer
 import org.springframework.web.context.ContextLoaderListener
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext
 import org.springframework.web.filter.CharacterEncodingFilter
+import org.springframework.web.filter.DelegatingFilterProxy
 import org.springframework.web.servlet.DispatcherServlet
+import java.util.*
+import javax.servlet.DispatcherType
 import javax.servlet.FilterRegistration
 import javax.servlet.ServletContext
 import javax.servlet.ServletRegistration
@@ -29,9 +32,12 @@ class Initializer(): WebApplicationInitializer {
         h2ConsoleServlet.setLoadOnStartup(2)
         h2ConsoleServlet.addMapping("/admin/h2/*")
 
-        val charFilterRegistration: FilterRegistration = servletContext.addFilter("CharacterEncodingFilter", CharacterEncodingFilter::class.java)
+        val charFilterRegistration: FilterRegistration = servletContext.addFilter("characterEncodingFilter", CharacterEncodingFilter::class.java)
         charFilterRegistration.setInitParameter("encoding", "UTF-8")
         charFilterRegistration.setInitParameter("forceEncoding", "true")
-        charFilterRegistration.addMappingForUrlPatterns(null, true, "/*")
+        charFilterRegistration.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*")
+
+        val securityFilter: FilterRegistration = servletContext.addFilter("springSecurityFilterChain", DelegatingFilterProxy::class.java)
+        securityFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true,"/*")
     }
 }

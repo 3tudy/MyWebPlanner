@@ -13,6 +13,8 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import org.springframework.orm.jpa.JpaTransactionManager
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.EnableTransactionManagement
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
@@ -107,5 +109,10 @@ open class Config(val applicationContext: ApplicationContext): WebMvcConfigurer 
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
         registry.addResourceHandler("/styles/**").addResourceLocations(CLASS_RESOURCE_PATH[1])
         registry.addResourceHandler("/**").addResourceLocations(CLASS_RESOURCE_PATH[0])
+    }
+
+    @Bean
+    open fun passwordEncoder(): PasswordEncoder {
+        return BCryptPasswordEncoder()
     }
 }
