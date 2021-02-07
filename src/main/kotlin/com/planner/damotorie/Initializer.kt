@@ -5,6 +5,7 @@ import org.h2.server.web.WebServlet
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.web.WebApplicationInitializer
 import org.springframework.web.context.ContextLoaderListener
+import org.springframework.web.context.request.RequestContextListener
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext
 import org.springframework.web.filter.CharacterEncodingFilter
 import org.springframework.web.filter.DelegatingFilterProxy
@@ -22,6 +23,7 @@ class Initializer(): WebApplicationInitializer {
         applicationContext.register(Config::class.java)
 
         servletContext.addListener(ContextLoaderListener(applicationContext))
+        servletContext.addListener(RequestContextListener())
 
         val dispatcher: ServletRegistration.Dynamic = servletContext.addServlet("dispather", DispatcherServlet(applicationContext))
         dispatcher.setLoadOnStartup(1)
