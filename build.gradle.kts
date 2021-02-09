@@ -35,10 +35,10 @@ dependencies {
     implementation(group = "org.thymeleaf", name = "thymeleaf-spring5", version = "3.0.11.RELEASE")
 
     // h2
-    implementation(group = "com.h2database", name = "h2", version = "1.4.200")
+//    implementation(group = "com.h2database", name = "h2", version = "1.4.200")
 
     // postgreSQL
-//    implementation(group = "org.postgresql", name = "postgresql", version = "42.2.18")
+    implementation(group = "org.postgresql", name = "postgresql", version = "42.2.18")
 
 }
 

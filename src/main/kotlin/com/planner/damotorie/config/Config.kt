@@ -29,52 +29,52 @@ import javax.sql.DataSource
 
 @Configuration
 @EnableWebMvc
-@EnableJpaRepositories(basePackages = ["com.planner.damotorie"])
-@EnableTransactionManagement
+//@EnableJpaRepositories(basePackages = ["com.planner.damotorie"])
+//@EnableTransactionManagement
 @ComponentScan(basePackages = ["com.planner.damotorie"])
 open class Config(val applicationContext: ApplicationContext): WebMvcConfigurer {
 
     val CLASS_RESOURCE_PATH: List<String> = listOf("classpath:/resources/", "classpath:/resources/statics/css/")
 
-    @Bean
-    open fun dataSource(): DataSource {
-        val dataSource: DriverManagerDataSource = DriverManagerDataSource()
-        dataSource.url = "jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1"
-        dataSource.username = "sa"
-        dataSource.password = ""
-        dataSource.setDriverClassName("org.h2.Driver")
-
-        return dataSource
-    }
-
-    @Bean
-    open fun entityManagerFactory(): LocalContainerEntityManagerFactoryBean {
-        val adapter: HibernateJpaVendorAdapter = HibernateJpaVendorAdapter()
-        adapter.setGenerateDdl(true)
-
-        val factory = LocalContainerEntityManagerFactoryBean()
-        factory.setJpaVendorAdapter(adapter)
-        factory.setPackagesToScan("com.planner.damotorie")
-        factory.dataSource = dataSource()
-        factory.setJpaProperties(jpaProperties())
-        return factory
-    }
-
-    fun jpaProperties(): Properties {
-        val properties:Properties = Properties()
-
-        properties.setProperty("show-sql", "true")
-        properties.setProperty("hibernate.naming.physical-strategy", "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl")
-
-        return properties
-    }
-
-    @Bean
-    open fun transactionManager(entityManagerFactory: EntityManagerFactory): PlatformTransactionManager {
-        val txManager: JpaTransactionManager = JpaTransactionManager()
-        txManager.entityManagerFactory = entityManagerFactory
-        return txManager
-    }
+//    @Bean
+//    open fun dataSource(): DataSource {
+//        val dataSource: DriverManagerDataSource = DriverManagerDataSource()
+//        dataSource.url = "jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1"
+//        dataSource.username = "sa"
+//        dataSource.password = ""
+//        dataSource.setDriverClassName("org.h2.Driver")
+//
+//        return dataSource
+//    }
+//
+//    @Bean
+//    open fun entityManagerFactory(): LocalContainerEntityManagerFactoryBean {
+//        val adapter: HibernateJpaVendorAdapter = HibernateJpaVendorAdapter()
+//        adapter.setGenerateDdl(true)
+//
+//        val factory = LocalContainerEntityManagerFactoryBean()
+//        factory.setJpaVendorAdapter(adapter)
+//        factory.setPackagesToScan("com.planner.damotorie")
+//        factory.dataSource = dataSource()
+//        factory.setJpaProperties(jpaProperties())
+//        return factory
+//    }
+//
+//    fun jpaProperties(): Properties {
+//        val properties:Properties = Properties()
+//
+//        properties.setProperty("show-sql", "true")
+//        properties.setProperty("hibernate.naming.physical-strategy", "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl")
+//
+//        return properties
+//    }
+//
+//    @Bean
+//    open fun transactionManager(entityManagerFactory: EntityManagerFactory): PlatformTransactionManager {
+//        val txManager: JpaTransactionManager = JpaTransactionManager()
+//        txManager.entityManagerFactory = entityManagerFactory
+//        return txManager
+//    }
 
     @Bean
     open fun templateResolver(): ITemplateResolver {
