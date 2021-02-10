@@ -1,5 +1,7 @@
 package com.planner.damotorie.config
 
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -9,10 +11,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement
 import org.springframework.transaction.PlatformTransactionManager
 
 import org.springframework.orm.jpa.JpaTransactionManager
-import org.springframework.orm.jpa.JpaVendorAdapter
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
-import org.springframework.jdbc.datasource.DriverManagerDataSource
 import java.util.Properties
 import javax.sql.DataSource
 
@@ -35,7 +35,7 @@ open class DBConfig {
     @Value("\${jdbc.password}")
     private lateinit var password: String
 
-    /* Hibernate 정보 */
+    /* Hibernate info */
     @Value("\${hibernate.dialect}")
     private lateinit var dialect: String
 
@@ -50,12 +50,8 @@ open class DBConfig {
 
     @Bean
     open fun dataSource(): DataSource {
-        val dataSource = DriverManagerDataSource()
-        dataSource.setDriverClassName(driverClassName)
-        dataSource.url = url
-        dataSource.username = userName
-        dataSource.password = password
-        return dataSource
+        val config = HikariConfig(hikariProperties())
+        return HikariDataSource(config)
     }
 
     private fun hibernateProperties(): Properties {
@@ -64,6 +60,15 @@ open class DBConfig {
         properties["hibernate.show_sql"] = showSql
         properties["hibernate.format_sql"] = formatSql
         properties["hibernate.hbm2ddl.auto"] = hbm2ddlAuto
+        return properties
+    }
+
+    private fun hikariProperties(): Properties {
+        val properties = Properties()
+        properties["driverClassName"] = driverClassName
+        properties["jdbcUrl"] = url
+        properties["username"] = userName
+        properties["password"] = password
         return properties
     }
 
@@ -82,6 +87,7 @@ open class DBConfig {
     open fun transactionManager(): PlatformTransactionManager {
         val transactionManager = JpaTransactionManager()
         transactionManager.entityManagerFactory = entityManagerFactory().getObject()
+        transactionManager.dataSource = dataSource()
         return transactionManager
     }
 }
