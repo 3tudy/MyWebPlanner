@@ -8,4 +8,5 @@ interface UserRepository: JpaRepository<User, Long> {
 
     fun findByEmail(email: String): User
 
+    fun findBySocialUidAndSocialAuthType(socialUid: String, socialAuthType: String): User
 }

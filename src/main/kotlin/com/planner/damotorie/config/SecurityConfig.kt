@@ -1,7 +1,9 @@
 package com.planner.damotorie.config
 
 import com.planner.damotorie.dao.AuthType
+import com.planner.damotorie.dao.UserRepository
 import com.planner.damotorie.security.oauth.ClientResources
+import com.planner.damotorie.security.oauth.OAuth2AuthenticationSuccessHandler
 import com.planner.damotorie.service.MemberService
 import com.planner.damotorie.service.UserInfoTokenServices
 import org.springframework.context.annotation.Bean
@@ -29,7 +31,8 @@ import javax.servlet.Filter
 @Configuration
 @EnableWebSecurity
 @EnableOAuth2Client
-open class SecurityConfig(val memberService: MemberService, val passwordEncoder: PasswordEncoder, val oAuth2ClientContext: OAuth2ClientContext, val oAuth2ClientContextFilter: OAuth2ClientContextFilter): WebSecurityConfigurerAdapter() {
+open class SecurityConfig(val memberService: MemberService, val passwordEncoder: PasswordEncoder, val oAuth2ClientContext: OAuth2ClientContext,
+                          val oAuth2ClientContextFilter: OAuth2ClientContextFilter, val userRepository: UserRepository): WebSecurityConfigurerAdapter() {
 
     override fun configure(auth: AuthenticationManagerBuilder?) {
         auth?.userDetailsService(memberService)?.passwordEncoder(passwordEncoder)
@@ -90,10 +93,7 @@ open class SecurityConfig(val memberService: MemberService, val passwordEncoder:
         tokenServices.restTemplate = restTemplate
         filter.setTokenServices(tokenServices)
 
-        filter.setAuthenticationSuccessHandler { request, response, authentication ->
-            val redirectStrategy: RedirectStrategy = DefaultRedirectStrategy()
-            redirectStrategy.sendRedirect(request, response, "/plan")
-        }
+        filter.setAuthenticationSuccessHandler(OAuth2AuthenticationSuccessHandler(userRepository))
         return filter
     }
 

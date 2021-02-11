@@ -25,6 +25,7 @@ class MemberService(val userRepository: UserRepository, val passwordEncoder: Pas
 
     fun registerNewUser(userDto: UserDto, authType: AuthType): User {
         val user: User = User(nickname = userDto.nickname, email = userDto.email,
+            socialUid = "",
             socialAuthType = authType.typeName,
             password = passwordEncoder.encode(userDto.password),
             role = "ROLE_MEMBER")

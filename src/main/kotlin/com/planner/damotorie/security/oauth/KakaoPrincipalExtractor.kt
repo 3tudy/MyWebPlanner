@@ -11,10 +11,12 @@ class KakaoPrincipalExtractor: PrincipalExtractor {
 
     override fun extractPrincipal(map: Map<String, Any>, authType: AuthType): SocialLoginPrincipal {
         try {
-            val id: String = map["id"] as String ?: throw Exception("ID should not be null")
+            val id: String = map["id"].toString() ?: throw Exception("ID should not be null")
 
             val nickname: String = with(map.getOrDefault("kakao_account", emptyMap<String, Any>()) as Map<String, Any>) {
-                getOrDefault("nickname", "") as String
+                val profile: Map<String, String> =
+                    getOrDefault("profile", emptyMap<String, String>()) as Map<String, String>
+                profile["nickname"] as String
             }
 
             val email: String = with(map.getOrDefault("kakao_account", emptyMap<String, Any>()) as Map<String, Any>) {

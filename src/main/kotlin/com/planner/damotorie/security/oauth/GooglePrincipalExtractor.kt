@@ -11,7 +11,7 @@ class GooglePrincipalExtractor: PrincipalExtractor {
 
     override fun extractPrincipal(map: Map<String, Any>, authType: AuthType): SocialLoginPrincipal {
         try {
-            val id: String = map["id"] as String ?: throw Exception("ID should not be null")
+            val id: String = map["sub"] as String ?: throw Exception("ID should not be null")
             val nickname: String = map.getOrDefault("name", "") as String
             val email: String = map.getOrDefault("email", "") as String
 
