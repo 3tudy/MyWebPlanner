@@ -9,9 +9,13 @@ class FacebookPrincipalExtractor: PrincipalExtractor {
         return type == AuthType.FACEBOOK
     }
 
-    override fun extractPrincipal(map: Map<String, Any>, authType: AuthType): Any {
+    override fun extractPrincipal(map: Map<String, Any>, authType: AuthType): SocialLoginPrincipal  {
         try {
-            return map["id"] ?: throw Exception("ID should not be null")
+            val id: String = map["id"] as String ?: throw Exception("ID should not be null")
+            val nickname: String = map.getOrDefault("name", "") as String
+            val email: String = map.getOrDefault("email", "") as String
+
+            return SocialLoginPrincipal(nickname, email, id, AuthType.FACEBOOK)
         } catch (e: Exception) {
             throw Exception("Wrong response format")
         }

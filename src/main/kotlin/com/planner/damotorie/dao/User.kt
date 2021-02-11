@@ -6,7 +6,7 @@ import javax.persistence.GenerationType
 import javax.persistence.Id
 
 @Entity
-class User(nickname: String, email: String, socialAuthType: String, password: String, role: String) {
+class User(nickname: String, email: String, socialUid: String, socialAuthType: String, password: String, role: String) {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -15,6 +15,8 @@ class User(nickname: String, email: String, socialAuthType: String, password: St
     val nickname: String = nickname
 
     val email: String = email
+
+    val socialUid: String = socialUid
 
     val socialAuthType: String = socialAuthType
 
@@ -31,6 +33,7 @@ class User(nickname: String, email: String, socialAuthType: String, password: St
         if (uid != other.uid) return false
         if (nickname != other.nickname) return false
         if (email != other.email) return false
+        if (socialUid != other.socialUid) return false
         if (socialAuthType != other.socialAuthType) return false
         if (password != other.password) return false
         if (role != other.role) return false
@@ -39,9 +42,10 @@ class User(nickname: String, email: String, socialAuthType: String, password: St
     }
 
     override fun hashCode(): Int {
-        var result = uid.hashCode()
+        var result = uid?.hashCode() ?: 0
         result = 31 * result + nickname.hashCode()
         result = 31 * result + email.hashCode()
+        result = 31 * result + socialUid.hashCode()
         result = 31 * result + socialAuthType.hashCode()
         result = 31 * result + password.hashCode()
         result = 31 * result + role.hashCode()

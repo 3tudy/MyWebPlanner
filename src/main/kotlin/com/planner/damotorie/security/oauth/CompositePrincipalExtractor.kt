@@ -11,7 +11,7 @@ class CompositePrincipalExtractor(val extractors: List<PrincipalExtractor>) : Pr
         }
     }
 
-    override fun extractPrincipal(map: Map<String, Any>, authType: AuthType): Any {
+    override fun extractPrincipal(map: Map<String, Any>, authType: AuthType): SocialLoginPrincipal {
 
         for (extractor: PrincipalExtractor in extractors) {
             if (extractor.support(authType)) {
