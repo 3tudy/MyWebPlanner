@@ -102,6 +102,7 @@ open class Config(val applicationContext: ApplicationContext): WebMvcConfigurer 
     open fun viewResolver(): ThymeleafViewResolver {
         val viewResolver: ThymeleafViewResolver = ThymeleafViewResolver()
         viewResolver.templateEngine = templateEngine()
+        viewResolver.characterEncoding = "UTF-8"
         viewResolver.order = 1
         return viewResolver
     }
