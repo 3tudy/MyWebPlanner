@@ -15,10 +15,12 @@ package com.planner.damotorie.service
  * limitations under the License.
  */
 
+import com.planner.damotorie.security.oauth.*
 import org.apache.commons.logging.LogFactory
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.client.OAuth2RestOperations
 import org.springframework.security.oauth2.client.OAuth2RestTemplate
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails
@@ -28,7 +30,6 @@ import org.springframework.security.oauth2.common.exceptions.InvalidTokenExcepti
 import org.springframework.security.oauth2.provider.OAuth2Authentication
 import org.springframework.security.oauth2.provider.OAuth2Request
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices
-import org.springframework.util.Assert
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.HashMap
@@ -39,17 +40,17 @@ import kotlin.collections.HashMap
  * @author Dave Syer
  * @since 1.3.0
  */
-class UserInfoTokenServices(private val userInfoEndpointUrl: String, private val clientId: String) :
-    ResourceServerTokenServices {
+class UserInfoTokenServices(private val clientResources: ClientResources) : ResourceServerTokenServices {
     protected val logger = LogFactory.getLog(javaClass)
     var restTemplate: OAuth2RestOperations? = null
-    var tokenType = DefaultOAuth2AccessToken.BEARER_TYPE
-    var authoritiesExtractor: AuthoritiesExtractor = FixedAuthoritiesExtractor()
-    var principalExtractor: PrincipalExtractor = FixedPrincipalExtractor()
+    val tokenType = DefaultOAuth2AccessToken.BEARER_TYPE
+    val principalExtractor: PrincipalExtractor = CompositePrincipalExtractor(listOf(
+        FacebookPrincipalExtractor(), GooglePrincipalExtractor(), NaverPrincipalExtractor(), KakaoPrincipalExtractor()
+    ))
 
     @Throws(AuthenticationException::class, InvalidTokenException::class)
     override fun loadAuthentication(accessToken: String): OAuth2Authentication {
-        val map = getMap(userInfoEndpointUrl, accessToken)
+        val map = getMap(clientResources.userInfoEndpointUri, accessToken)
         if (map.containsKey("error")) {
             if (logger.isDebugEnabled) {
                 logger.debug("userinfo returned error: " + map["error"])
@@ -61,12 +62,9 @@ class UserInfoTokenServices(private val userInfoEndpointUrl: String, private val
 
     private fun extractAuthentication(map: Map<String, Any>): OAuth2Authentication {
         val principal = getPrincipal(map)
-        val authorities: List<GrantedAuthority> = authoritiesExtractor.extractAuthorities(map)
-        val request = OAuth2Request(null, clientId, null, true, null, null, null, null, null)
-        val token = UsernamePasswordAuthenticationToken(
-            principal, "N/A",
-            authorities
-        )
+        val authorities: List<GrantedAuthority> = listOf(SimpleGrantedAuthority("ROLE_MEMBER"))
+        val request = OAuth2Request(null, clientResources.client.clientId, null, true, null, null, null, null, null)
+        val token = UsernamePasswordAuthenticationToken(principal, "N/A", authorities)
         token.details = map
         return OAuth2Authentication(request, token)
     }
@@ -78,7 +76,7 @@ class UserInfoTokenServices(private val userInfoEndpointUrl: String, private val
      * @return the principal or &quot;unknown&quot;
      */
     protected fun getPrincipal(map: Map<String, Any>): Any {
-        val principal: Any = principalExtractor.extractPrincipal(map)
+        val principal: Any = principalExtractor.extractPrincipal(map, clientResources.authType)
         return principal ?: "unknown"
     }
 
@@ -87,7 +85,6 @@ class UserInfoTokenServices(private val userInfoEndpointUrl: String, private val
     }
 
     private fun getMap(path: String, accessToken: String): Map<String, Any> {
-        // TODO 삭제 필요
         val typeInstance: Map<String, Any> = HashMap<String, Any>()
         if (logger.isDebugEnabled) {
             logger.debug("Getting user info from: $path")
@@ -96,7 +93,7 @@ class UserInfoTokenServices(private val userInfoEndpointUrl: String, private val
             var restTemplate = restTemplate
             if (restTemplate == null) {
                 val resource = BaseOAuth2ProtectedResourceDetails()
-                resource.clientId = clientId
+                resource.clientId = clientResources.client.clientId
                 restTemplate = OAuth2RestTemplate(resource)
             }
             val existingToken = restTemplate.oAuth2ClientContext.accessToken
@@ -106,7 +103,6 @@ class UserInfoTokenServices(private val userInfoEndpointUrl: String, private val
                 restTemplate.oAuth2ClientContext.accessToken = token
             }
             restTemplate.getForEntity(path, typeInstance.javaClass).getBody()
-//            restTemplate.getForObject(path, typeInstance.javaClass)
         } catch (ex: Exception) {
             logger.warn("Could not fetch user details: " + ex.javaClass + ", " + ex.message)
             Collections.singletonMap<String, Any>("error", "Could not fetch user details")

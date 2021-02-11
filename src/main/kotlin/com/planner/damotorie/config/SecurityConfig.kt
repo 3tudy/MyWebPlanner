@@ -1,7 +1,7 @@
 package com.planner.damotorie.config
 
 import com.planner.damotorie.dao.AuthType
-import com.planner.damotorie.service.ClientResources
+import com.planner.damotorie.security.oauth.ClientResources
 import com.planner.damotorie.service.MemberService
 import com.planner.damotorie.service.UserInfoTokenServices
 import org.springframework.context.annotation.Bean
@@ -24,7 +24,6 @@ import org.springframework.security.web.RedirectStrategy
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 import org.springframework.security.web.context.SecurityContextPersistenceFilter
 import org.springframework.web.filter.CompositeFilter
-import java.lang.Exception
 import javax.servlet.Filter
 
 @Configuration
@@ -46,7 +45,7 @@ open class SecurityConfig(val memberService: MemberService, val passwordEncoder:
             ?.sameOrigin()
             ?.and()
             ?.authorizeRequests()
-            ?.antMatchers("/register", "/admin/h2/**", "/login/**")?.anonymous()
+            ?.antMatchers("/register", "/admin/**", "/login/**")?.anonymous()
             ?.antMatchers("/**")?.hasRole("MEMBER")
             ?.and()
             ?.formLogin()
@@ -86,17 +85,7 @@ open class SecurityConfig(val memberService: MemberService, val passwordEncoder:
         restTemplate.messageConverters = listOf(messageConverter)
         filter.restTemplate = restTemplate
 
-        val tokenServices: UserInfoTokenServices
-        if (authType == AuthType.FACEBOOK)
-             tokenServices = UserInfoTokenServices("https://graph.facebook.com/me?fields=id", clientResources.client.clientId)
-        else if (authType == AuthType.GOOGLE)
-            tokenServices = UserInfoTokenServices("https://www.googleapis.com/oauth2/v3/userinfo", clientResources.client.clientId)
-        else if (authType == AuthType.NAVER)
-            tokenServices = UserInfoTokenServices("https://openapi.naver.com/v1/nid/me", clientResources.client.clientId)
-        else if (authType == AuthType.KAKAO)
-            tokenServices = UserInfoTokenServices("https://kapi.kakao.com/v2/user/me", clientResources.client.clientId)
-        else
-            throw Exception("${authType} is not supported")
+        val tokenServices: UserInfoTokenServices = UserInfoTokenServices(clientResources)
 
         tokenServices.restTemplate = restTemplate
         filter.setTokenServices(tokenServices)
@@ -111,10 +100,12 @@ open class SecurityConfig(val memberService: MemberService, val passwordEncoder:
     @Bean
     open fun facebook(): ClientResources {
         val properties: Map<String, String> = mapOf<String, String>(
+            "authType" to "facebook",
             "clientId" to "",
             "clientSecret" to "",
             "accessTokenUri" to "https://graph.facebook.com/oauth/access_token",
             "userAuthorizationUri" to "https://www.facebook.com/v9.0/dialog/oauth",
+            "userInfoEndpointUri" to "https://graph.facebook.com/me?fields=id",
             "tokenName" to "oauth_token",
             "authenticationScheme" to "query",
             "clientAuthenticationScheme" to "form"
@@ -125,10 +116,12 @@ open class SecurityConfig(val memberService: MemberService, val passwordEncoder:
     @Bean
     open fun google(): ClientResources {
         val properties: Map<String, String> = mapOf<String, String>(
+            "authType" to "google",
             "clientId" to "",
             "clientSecret" to "",
             "accessTokenUri" to "https://oauth2.googleapis.com/token",
             "userAuthorizationUri" to "https://accounts.google.com/o/oauth2/v2/auth",
+            "userInfoEndpointUri" to "https://www.googleapis.com/oauth2/v3/userinfo",
             "authenticationScheme" to "header",
             "clientAuthenticationScheme" to "form",
             "scope" to "email,profile"
@@ -140,10 +133,12 @@ open class SecurityConfig(val memberService: MemberService, val passwordEncoder:
     @Bean
     open fun naver(): ClientResources {
         val properties: Map<String, String> = mapOf<String, String>(
+            "authType" to "naver",
             "clientId" to "",
             "clientSecret" to "",
             "accessTokenUri" to "https://nid.naver.com/oauth2.0/token",
             "userAuthorizationUri" to "https://nid.naver.com/oauth2.0/authorize",
+            "userInfoEndpointUri" to "https://openapi.naver.com/v1/nid/me",
             "authenticationScheme" to "header",
             "clientAuthenticationScheme" to "form"
         )
@@ -154,10 +149,12 @@ open class SecurityConfig(val memberService: MemberService, val passwordEncoder:
     @Bean
     open fun kakao(): ClientResources {
         val properties: Map<String, String> = mapOf<String, String>(
+            "authType" to "kakao",
             "clientId" to "",
             "clientSecret" to "",
             "accessTokenUri" to "https://kauth.kakao.com/oauth/token",
             "userAuthorizationUri" to "https://kauth.kakao.com/oauth/authorize",
+            "userInfoEndpointUri" to "https://kapi.kakao.com/v2/user/me",
             "authenticationScheme" to "header",
             "clientAuthenticationScheme" to "form"
         )
