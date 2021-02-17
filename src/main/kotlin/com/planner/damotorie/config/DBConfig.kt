@@ -45,8 +45,8 @@ open class DBConfig {
     @Value("\${hibernate.format_sql}")
     private lateinit var formatSql: String
 
-    @Value("\${hibernate.hbm2ddl.auto}")
-    private lateinit var hbm2ddlAuto: String
+    @Value("\${hibernate.ddl-auto}")
+    private lateinit var ddlAuto: String
 
     @Bean
     open fun dataSource(): DataSource {
@@ -59,7 +59,7 @@ open class DBConfig {
         properties["hibernate.dialect"] = dialect
         properties["hibernate.show_sql"] = showSql
         properties["hibernate.format_sql"] = formatSql
-        properties["hibernate.hbm2ddl.auto"] = hbm2ddlAuto
+        properties["hibernate.hbm2ddl.auto"] = ddlAuto
         return properties
     }
 

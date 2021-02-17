@@ -2,9 +2,6 @@ package com.planner.damotorie
 
 import com.planner.damotorie.config.Config
 import com.planner.damotorie.config.DBConfig
-
-//import org.h2.server.web.WebServlet
-import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.web.WebApplicationInitializer
 import org.springframework.web.context.ContextLoaderListener
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext
@@ -26,10 +23,6 @@ class Initializer(): WebApplicationInitializer {
         dispatcher.setLoadOnStartup(1)
         dispatcher.addMapping("/")
 
-//        val h2ConsoleServlet: ServletRegistration.Dynamic = servletContext.addServlet("H2Console", WebServlet::class.java)
-//        h2ConsoleServlet.setInitParameter("-webAllowOthers", "true")
-//        h2ConsoleServlet.setLoadOnStartup(2)
-//        h2ConsoleServlet.addMapping("/admin/h2/*")
 
         val charFilterRegistration: FilterRegistration = servletContext.addFilter("CharacterEncodingFilter", CharacterEncodingFilter::class.java)
         charFilterRegistration.setInitParameter("encoding", "UTF-8")
